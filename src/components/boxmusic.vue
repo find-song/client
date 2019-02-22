@@ -1,10 +1,12 @@
 <template>
 <div>
-  <v-btn @click.prevent="startPlay" color="info">Start</v-btn>
- Score: {{playerPoin}}
- Score opponent: {{opponentScore}}
+  <v-btn @click.prevent="playerStatus = true" color="info">Ready</v-btn>
+  <v-btn @click.prevent="playerStatus = false" color="info">Cancel</v-btn>
+    Poin: {{playerPoin}}
+    Poin opponent: {{opponentPoin}}
     <!-- <button @click.prevent="musicPlay = false"> stop</button> -->
     <!-- <button @click.prevent="next"> next</button> -->
+    {{startTime}}
     <div v-if="startTime">
       <v-card max-width="100px" color="transparent">
         <v-img :src="storeNumber[Math.ceil(startTime / 2)-1]"/>
@@ -62,17 +64,24 @@ export default {
       randomAnswers: [],
       startTime: 0,
       canPick: false,
+      newTitles: [],
+      newMusics: [],
       correct: 0,
       playerPoin: 0,
       playerWin: 0,
       opponent: 0,
-      opponentScore: 0,
+      opponentPoin: 0,
       opponentWin: 0,
+      roomStatus: false,
+      playerStatus: false,
+      opponentStatus: false,
       storeNumber: ['http://www.pngall.com/wp-content/uploads/2016/04/1-Number-PNG.png', 'https://cdn.pixabay.com/photo/2015/02/13/09/48/pay-634913__340.png', 'http://www.pngall.com/wp-content/uploads/2016/04/3-Number-PNG.png']
+      // showButton: false
     }
   },
 
   created () {
+    this.playTime()
     db.collection('rooms')
       .doc(this.$route.params.roomId) // diambil dari create room
       .onSnapshot(doc => {
@@ -82,21 +91,21 @@ export default {
           this.playerPoin = doc.data().player1Poin
           this.playerWin = doc.data().player1Win
           this.opponent = doc.data().player2
-          this.opponentScore = doc.data().player2Poin
+          this.opponentPoin = doc.data().player2Poin
           this.opponentWin = doc.data().player2Win
+          this.opponentStatus = doc.data().player2Status
         } else {
           this.username = doc.data().player2
           this.playerPoin = doc.data().player2Poin
           this.playerWin = doc.data().player2Win
           this.opponent = doc.data().player1
-          this.opponentScore = doc.data().player1Poin
+          this.opponentPoin = doc.data().player1Poin
           this.opponentWin = doc.data().player1Win
+          this.opponentStatus = doc.data().player1Status
         }
-        this.musics = []
-        for (let i = 0; i < 10; i++) {
-          this.music()
-        }
-        this.playTime()
+        this.titles = doc.data().titles
+        this.musics = doc.data().musics
+        this.roomStatus = doc.data().roomStatus
       })
   },
 
@@ -104,30 +113,99 @@ export default {
     counter (val) {
       if (val < 0) {
         if (this.total < 0) {
+          if (this.playerPoin > this.opponentPoin) {
+            this.playerWin++
+            db.collection('rooms').doc(this.$route.params.roomId).update({
+              player1Poin: 0,
+              player2Poin: 0,
+              [`${this.$route.params.player}Win`]: this.playerWin
+            })
+          }
           this.musicPlay = false
           console.log('===')
+          this.newMusics = []
+          this.newTitles = []
           // db.collection('rooms').doc(this.$route.params.roomId)
         }
         this.counter = 5
         this.total--
         this.canPick = true
         this.randomAnswers = []
-        this.randomAnswers[Math.floor(Math.random() * 4)] = this.titles[this.total]
-        for (let i = 0; i < 4; i++) {
-          let random = Math.floor(Math.random() * this.titles.length)
-          let randomTitle = this.titles[random]
-          if (!this.randomAnswers[i]) {
-            this.randomAnswers[i] = randomTitle
-          } else {
-            this.correct = i
+        if (this.titles) {
+          this.randomAnswers[Math.floor(Math.random() * 4)] = this.titles[this.total]
+          for (let i = 0; i < 4; i++) {
+            let random = Math.floor(Math.random() * this.titles.length)
+            let randomTitle = this.titles[random]
+            if (!this.randomAnswers[i]) {
+              this.randomAnswers[i] = randomTitle
+            } else {
+              this.correct = i
+            }
           }
         }
       }
     },
 
-    randomAnswers (val) {
+    roomStatus (val) {
+      if (val === true) {
+        this.startPlay()
+      } else {
+        this.musicPlay = false
+        db.collection('rooms').doc(this.$route.params.roomId).update({
+          player1Poin: 0,
+          player2Poin: 0,
+          musics: [],
+          titles: []
+        })
+      }
+    },
+
+    playerStatus (val) {
+      db.collection('rooms').doc(this.$route.params.roomId).update({
+        [`${this.$route.params.player}Status`]: this.playerStatus
+      })
+        .then(() => {
+          console.log('1')
+          if (this.playerStatus === true && this.opponentStatus === true) {
+            for (let i = 0; i < 10; i++) {
+              this.music()
+            }
+          }
+        })
+    },
+
+    opponentStatus (val) {
+      console.log(this.playerWin)
+      if (this.roomStatus === true && val === false) {
+        this.playerWin++
+        db.collection('rooms').doc(this.$route.params.roomId).update({
+          player1Poin: 0,
+          player2Poin: 0,
+          [`${this.$route.params.player}Win`]: this.playerWin,
+          roomStatus: false
+        })
+      }
+    },
+
+    newMusics (val) {
       console.log(val)
+      if (val.length === 10) {
+        db.collection('rooms').doc(this.$route.params.roomId).update({
+          musics: this.newMusics,
+          titles: this.newTitles
+        })
+          .then(() => {
+            console.log('2')
+            db.collection('rooms').doc(this.$route.params.roomId).update({
+              roomStatus: true
+            })
+              .then(() => {
+                console.log('3')
+              })
+          })
+      }
     }
+
   },
   methods: {
     music () {
@@ -145,11 +223,10 @@ export default {
         )
         .then(({ data: { data } }) => {
           let random = Math.floor(Math.random() * 2)
-          this.titles.push(data[random].title)
-          this.musics.push(data[random].preview)
-          db.collection('rooms').doc(this.$route.params.roomId).update({
-
-          })
+          // console.log(this.titles, 'ini title')
+          // console.log(this.music, 'ini music')
+          this.newTitles.push(data[random].title)
+          this.newMusics.push(data[random].preview)
         })
         .catch(err => {
           console.log(err.response)
@@ -159,13 +236,13 @@ export default {
 
     playTime () {
       this.counter = 5
-      let intervalId = setInterval(() => {
+      setInterval(() => {
         this.counter -= 1
         if (this.startTime > 0) {
           this.startTime--
         }
         if (this.counter < 0) {
-          clearInterval(intervalId)
+          // clearInterval(intervalId)
         }
       }, 1000)
     },
@@ -211,6 +288,10 @@ export default {
     wrong () {
       this.canPick = false
       this.playerPoin -= 5
+      let thisplayerPoin = this.$route.params.player + 'Poin'
+      db.collection('rooms').doc(this.$route.params.roomId).update({
+        [thisplayerPoin]: this.playerPoin
+      })
     }
 
   }
