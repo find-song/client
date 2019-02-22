@@ -12,6 +12,7 @@ export default new Router({
       path: '/',
       name: 'home',
       component: Home
+
     },
     {
       path: '/game/:roomId/:player',
@@ -19,8 +20,9 @@ export default new Router({
       props: true,
       component: () => import('./views/About.vue'),
       beforeEnter: (to, from, next) => {
-        console.log(to.params)
-        if (to.params.roomId && to.params.player) {
+        console.log(from, '==========> route FROM')
+        console.log(to, '============> route TO')
+        if (from.name !== null) {
           next()
         } else {
           next({ name: 'home' })
