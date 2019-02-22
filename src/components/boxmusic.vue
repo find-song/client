@@ -1,15 +1,9 @@
 <template>
 <div>
-<<<<<<< HEAD
   <v-btn @click.prevent="playerStatus = true" color="info">Ready</v-btn>
   <v-btn @click.prevent="playerStatus = false" color="info">Cancel</v-btn>
     Poin: {{playerPoin}}
     Poin opponent: {{opponentPoin}}
-=======
-  <v-btn @click.prevent="startPlay" color="info">Start</v-btn>
- Score: {{playerPoin}}
- Score: {{opponentScore}}
->>>>>>> a
     <!-- <button @click.prevent="musicPlay = false"> stop</button> -->
     <!-- <button @click.prevent="next"> next</button> -->
     {{startTime}}
@@ -129,14 +123,9 @@ export default {
             })
           }
           this.musicPlay = false
-<<<<<<< HEAD
-          console.log('===')
           this.newMusics = []
           this.newTitles = []
           // db.collection('rooms').doc(this.$route.params.roomId)
-=======
-          db.collection('rooms').doc(this.$route.params.roomId)
->>>>>>> a
         }
         this.counter = 5
         this.total--
@@ -234,15 +223,10 @@ export default {
         )
         .then(({ data: { data } }) => {
           let random = Math.floor(Math.random() * 2)
-<<<<<<< HEAD
           // console.log(this.titles, 'ini title')
           // console.log(this.music, 'ini music')
           this.newTitles.push(data[random].title)
           this.newMusics.push(data[random].preview)
-=======
-          this.titles.push(data[random].title)
-          this.musics.push(data[random].preview)
->>>>>>> a
         })
         .catch(err => {
           console.log(err.response)
