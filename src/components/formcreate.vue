@@ -47,7 +47,9 @@ export default {
         player2Win: 0,
         player1Status: false,
         player2Status: false,
-        roomStatus: false
+        roomStatus: false,
+        titles: [],
+        musics: []
       })
         .then(() => {
           console.log('created data')
