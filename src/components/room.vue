@@ -6,7 +6,7 @@
         </div>
       </v-card-title>
       <p v-if='room.player1'>Player 1 : {{room.player1}}</p>
-      <p v-if='room.roomStatus'> {{room.player1Poin}} VS {{room.player2Poin}} </p>
+      <p v-if='room.roomStatus'> {{room.player1Win}} VS {{room.player2Win}} </p>
       <p v-if='room.player2'>Player 2 : {{room.player2}}</p>
       <v-card-actions>
       <v-dialog v-model="join" persistent max-width="600px">

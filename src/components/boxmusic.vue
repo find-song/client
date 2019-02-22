@@ -2,8 +2,31 @@
 <div>
   <v-btn @click.prevent="playerStatus = true" color="info">Ready</v-btn>
   <v-btn @click.prevent="playerStatus = false" color="info">Cancel</v-btn>
-    Poin: {{playerPoin}}
-    Poin opponent: {{opponentPoin}}
+    <v-card>
+      <v-container
+        fluid
+        grid-list-lg
+      >
+        <v-layout row wrap>
+          <v-flex xs12>
+            <v-card color="blue-grey darken-2" class="white--text">
+              <v-card-title primary-title>
+                <div>
+                  <div class="headline">SCORE</div>
+                  <p>Your Win : {{playerWin}}</p>
+                  <p>opponent Win : {{opponentWin}}</p>
+                  <hr/>
+                  <br>
+                  <p>Poin: {{playerPoin}}</p>
+                  <p>Poin opponent: {{opponentPoin}}</p>
+                </div>
+              </v-card-title>
+            </v-card>
+          </v-flex>
+          </v-layout>
+          </v-container>
+          </v-card>
+
     <!-- <button @click.prevent="musicPlay = false"> stop</button> -->
     <!-- <button @click.prevent="next"> next</button> -->
     {{startTime}}
@@ -265,20 +288,7 @@ export default {
 
     next () {
       this.playerPoin += 10
-      this.total--
-      this.counter = 5
-      this.canPick = true
-      this.randomAnswers = []
-      this.randomAnswers[Math.floor(Math.random() * 4)] = this.titles[this.total]
-      for (let i = 0; i < 4; i++) {
-        let random = Math.floor(Math.random() * this.titles.length)
-        let randomTitle = this.titles[random]
-        if (!this.randomAnswers[i]) {
-          this.randomAnswers[i] = randomTitle
-        } else {
-          this.correct = i
-        }
-      }
+      this.canPick = false
       let thisplayerPoin = this.$route.params.player + 'Poin'
       db.collection('rooms').doc(this.$route.params.roomId).update({
         [thisplayerPoin]: this.playerPoin

@@ -64,24 +64,21 @@ export default {
   },
   methods: {
     leave () {
-      // console.log(this.$route.params.roomaId)
-      // console.log(this.$route.params.name)
-      let player = ''
-      if (this.$routes.params.player) {
-        player = 'player1'
-      } else {
-        player = 'player2'
-      }
+      console.log(`${this.$route.params.player}Status`)
       db.collection('rooms')
-        .doc('this.$route.params.roomId')
+        .doc(this.$route.params.roomId)
         .update({
-          [player]: ''
+          [this.$route.params.player]: '',
+          [`${this.$route.params.player}Status`]: false,
+          roomStatus: false
         })
         .then(() => {
           console.log('leave room')
+          this.$router.push('/')
         })
         .catch(err => {
           console.log(err)
+          this.$router.push('/')
         })
     }
   }
