@@ -43,6 +43,8 @@ export default {
         player2: '',
         player1Poin: 0,
         player2Poin: 0,
+        player1Win: 0,
+        player2Win: 0,
         player1Status: false,
         player2Status: false,
         roomStatus: false
