@@ -156,6 +156,7 @@ export default {
     counter (val) {
       if (val < 0) {
         if (this.total < 0) {
+          this.loading = false
           if (this.playerPoin > this.opponentPoin) {
             this.playerWin++
             db.collection('rooms').doc(this.$route.params.roomId).update({
