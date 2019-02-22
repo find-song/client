@@ -29,12 +29,19 @@
 
     <!-- <button @click.prevent="musicPlay = false"> stop</button> -->
     <!-- <button @click.prevent="next"> next</button> -->
-    {{startTime}}
     <div v-if="startTime">
-      <v-card max-width="100px" color="transparent">
-        <v-img :src="storeNumber[Math.ceil(startTime / 2)-1]"/>
+      <v-card max-width="100px" flat color="transparent">
+        <v-img  :src="storeNumber[Math.ceil(startTime / 2)-1]"/>
       </v-card>
     </div>
+
+    <v-progress-circular
+      v-if="loading"
+      :size="50"
+      color="primary"
+      indeterminate
+    ></v-progress-circular>
+
     <iframe
       v-if="musicPlay === true"
       :src="counter === 0 ? musics[total - 1] : musics[total]"
@@ -42,6 +49,17 @@
       style="display: none"
       id="iframeAudio"
     ></iframe>
+
+    <div v-if="musicPlay === true">
+      <v-card v-if="counter < 10" max-width="100px" color="transparent" flat>
+        <v-img :src="numberLogo[9-counter]"/>
+      </v-card>
+      <v-card v-else max-width="100px" flat color="transparent">
+        <v-img v-if="counter === 0" :src="numberLogo[9-counter]"/>
+      </v-card>
+
+    </div>
+
     <div v-if="musicPlay === true && canPick === true">
       <div v-for="(title,index) in randomAnswers" :key="index" >
          <v-btn color="cyan darken-1" v-if="index === correct" @click="next">{{randomAnswers[index]}}</v-btn>
@@ -49,7 +67,6 @@
       </div>
     </div>
 
-    <div v-if="musicPlay === true">{{counter}}</div>
 </div>
 </template>
 
@@ -74,7 +91,6 @@ export default {
         'payung teduh',
         'fourtwenty',
         'brisia jodie',
-        'hivi',
         'sheila on 7',
         'ada band'
       ],
@@ -99,8 +115,11 @@ export default {
       roomStatus: false,
       playerStatus: false,
       opponentStatus: false,
-      storeNumber: ['http://www.pngall.com/wp-content/uploads/2016/04/1-Number-PNG.png', 'https://cdn.pixabay.com/photo/2015/02/13/09/48/pay-634913__340.png', 'http://www.pngall.com/wp-content/uploads/2016/04/3-Number-PNG.png']
+      loading: false,
+      storeNumber: ['http://www.pngall.com/wp-content/uploads/2016/04/1-Number-PNG.png', 'https://cdn.pixabay.com/photo/2015/02/13/09/48/pay-634913__340.png', 'http://www.pngall.com/wp-content/uploads/2016/04/3-Number-PNG.png'],
       // showButton: false
+      numberLogo: ['https://cdn3.iconfinder.com/data/icons/letters-and-numbers-1/32/number_9_blue-128.png', 'https://cdn3.iconfinder.com/data/icons/letters-and-numbers-1/32/number_8_blue-128.png', 'https://cdn3.iconfinder.com/data/icons/letters-and-numbers-1/32/number_7_blue-256.png', 'https://cdn3.iconfinder.com/data/icons/letters-and-numbers-1/32/number_6_blue-256.png', 'https://cdn3.iconfinder.com/data/icons/letters-and-numbers-1/32/number_5_blue-256.png', 'https://cdn3.iconfinder.com/data/icons/letters-and-numbers-1/32/number_4_blue-256.png', 'https://cdn3.iconfinder.com/data/icons/letters-and-numbers-1/32/number_3_blue-256.png', 'https://cdn3.iconfinder.com/data/icons/letters-and-numbers-1/32/number_2_blue-256.png', 'https://cdn3.iconfinder.com/data/icons/letters-and-numbers-1/32/number_1_blue-256.png', 'https://cdn3.iconfinder.com/data/icons/letters-and-numbers-1/32/number_0_blue-256.png'
+      ]
     }
   },
 
@@ -142,6 +161,18 @@ export default {
             db.collection('rooms').doc(this.$route.params.roomId).update({
               player1Poin: 0,
               player2Poin: 0,
+              roomStatus: false,
+              player1Status: false,
+              player2Status: false,
+              [`${this.$route.params.player}Win`]: this.playerWin
+            })
+          } else if (this.playerPoin === this.opponentPoin) {
+            db.collection('rooms').doc(this.$route.params.roomId).update({
+              player1Poin: 0,
+              player2Poin: 0,
+              roomStatus: false,
+              player1Status: false,
+              player2Status: false,
               [`${this.$route.params.player}Win`]: this.playerWin
             })
           }
@@ -150,7 +181,7 @@ export default {
           this.newTitles = []
           // db.collection('rooms').doc(this.$route.params.roomId)
         }
-        this.counter = 5
+        this.counter = 10
         this.total--
         this.canPick = true
         this.randomAnswers = []
@@ -188,6 +219,7 @@ export default {
         [`${this.$route.params.player}Status`]: this.playerStatus
       })
         .then(() => {
+          this.loading = true
           console.log('1')
           if (this.playerStatus === true && this.opponentStatus === true) {
             for (let i = 0; i < 10; i++) {
@@ -258,7 +290,7 @@ export default {
     },
 
     playTime () {
-      this.counter = 5
+      this.counter = 10
       setInterval(() => {
         this.counter -= 1
         if (this.startTime > 0) {
@@ -271,6 +303,7 @@ export default {
     },
 
     startPlay () {
+      this.loading = false
       this.startTime = 6
       setTimeout(() => {
         this.randomAnswers[Math.floor(Math.random() * 4)] = this.titles[this.total]
@@ -280,7 +313,7 @@ export default {
             this.randomAnswers[i] = random
           }
           this.musicPlay = true
-          this.counter = 5
+          this.counter = 10
           this.canPick = true
         }
       }, this.startTime * 1000)
