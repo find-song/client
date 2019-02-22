@@ -16,7 +16,16 @@ export default new Router({
     {
       path: '/game/:roomId/:player',
       name: 'game',
-      component: () => import('./views/About.vue')
+      props: true,
+      component: () => import('./views/About.vue'),
+      beforeEnter: (to, from, next) => {
+        console.log(to.params)
+        if (to.params.roomId && to.params.player) {
+          next()
+        } else {
+          next({ name: 'home' })
+        }
+      }
     }
   ]
 })

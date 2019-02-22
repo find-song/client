@@ -6,11 +6,15 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    rooms: []
+    rooms: [],
+    name: ''
   },
   mutations: {
     getAllRooms (state, payload) {
       state.rooms = payload
+    },
+    getName (state, payload) {
+      state.name = payload
     }
   },
   actions: {
